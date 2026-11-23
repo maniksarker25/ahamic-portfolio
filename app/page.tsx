@@ -13,6 +13,12 @@ import { Testimonials } from '../components/sections/Testimonials';
 import { FAQ } from '../components/sections/FAQ';
 import { BlogPreview } from '../components/sections/BlogPreview';
 import { CTA } from '../components/sections/CTA';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  openGraph: { url: '/' }
+};
 
 export default function Home() {
   return (

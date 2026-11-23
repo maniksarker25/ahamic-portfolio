@@ -1,15 +1,19 @@
-
-
-
-
 import React from 'react';
 import { PageHero } from '../../components/shared/PageHero';
-import { AboutGalleryShowcase } from '../../components/sections/AboutGalleryShowcase';
+import { TeamGridShowcase } from '../../components/sections/TeamGridShowcase';
 import { Stats } from '../../components/sections/Stats';
 import { Process } from '../../components/sections/Process';
 import { Section, SectionHeading } from '../../components/shared/Section';
 import { Reveal } from '../../components/shared/Reveal';
 import { CTA } from '../../components/sections/CTA';
+import { Team } from '../../components/sections/Team';
+import { pageMetadata } from '../../lib/seo';
+
+export const metadata = pageMetadata({
+  title: "About Us",
+  description: "Meet Ahamic Solutions — a small, senior software team in Dhaka, Bangladesh, building web, mobile and SaaS products for clients worldwide.",
+  path: "/about"
+});
 
 const VALUES = [
 { title: 'Craft over volume', body: 'We take fewer projects so each one gets the obsessive attention it deserves.' },
@@ -17,10 +21,6 @@ const VALUES = [
 { title: 'Honesty over comfort', body: 'We tell you what we would do if it were our own company — even when it is hard to hear.' },
 { title: 'Ownership over ego', body: 'We leave you with clean code, clear docs, and a team that can run without us.' }];
 
-
-const TEAM = [
-{ name: 'Amir Haque', role: 'Founder & Principal Engineer', initials: 'AH' },
-{ name: 'Nadia Rahman', role: 'Head of Design', initials: 'NR' }];
 
 
 export default function About() {
@@ -32,8 +32,10 @@ export default function About() {
         title={<>A studio built on craft,<br />candor, and consequence.</>}
         subtitle="Ahamic Solutions started with a simple conviction: the best software comes from small, senior teams who care deeply and stay accountable. Years later, that is still exactly how we work." />
 
-      {/* ── Mosaic gallery (same arch-grid as Hero) ── */}
-      <AboutGalleryShowcase />
+      {/* ── Team mosaic (same component as the home hero) ── */}
+      <div className="bg-[#e8f5fd] pt-12">
+        <TeamGridShowcase />
+      </div>
 
       <Stats />
 
@@ -59,22 +61,7 @@ export default function About() {
         </div>
       </Section>
 
-      <Section className="pt-0">
-        <SectionHeading eyebrow="The team" title="Senior people, hands on keyboards" subtitle="No account managers between you and the people doing the work." />
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {TEAM.map((m, i) =>
-          <Reveal key={m.name} delay={i * 0.06}>
-              <div className="group rounded-3xl border border-border bg-card p-6 text-center transition-colors hover:border-accent/50">
-                <span className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-accent/15 font-display text-xl font-semibold text-accent-soft">
-                  {m.initials}
-                </span>
-                <h3 className="mt-5 font-display text-base font-semibold text-ink">{m.name}</h3>
-                <p className="mt-1 text-sm text-muted">{m.role}</p>
-              </div>
-            </Reveal>
-          )}
-        </div>
-      </Section>
+      <Team />
 
       <Process />
       <CTA />

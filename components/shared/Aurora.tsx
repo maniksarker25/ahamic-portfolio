@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 /** Decorative animated background glow. Purely visual. */

@@ -1,7 +1,3 @@
-
-
-
-
 import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRightIcon } from 'lucide-react';
@@ -53,7 +49,7 @@ export function ServicesGrid({ showAll = false }: {showAll?: boolean;}) {
         href="/services"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium text-ink transition-colors hover:border-accent/60">
           
-            Explore all 18 services <ArrowUpRightIcon className="h-4 w-4" />
+            Explore all {SERVICES.length} services <ArrowUpRightIcon className="h-4 w-4" />
           </Link>
         </div>
       }

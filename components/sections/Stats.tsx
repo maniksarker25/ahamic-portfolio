@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 import { Section } from '../shared/Section';
 import { Reveal } from '../shared/Reveal';

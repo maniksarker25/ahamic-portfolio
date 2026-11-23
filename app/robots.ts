@@ -1,11 +1,10 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
+import { SITE } from '../constants/site';
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-    },
-    sitemap: 'https://www.ahamicsolutions.com/sitemap.xml',
+    rules: { userAgent: '*', allow: '/', disallow: ['/thank-you'] },
+    sitemap: `${SITE.url}/sitemap.xml`,
+    host: SITE.url
   };
 }

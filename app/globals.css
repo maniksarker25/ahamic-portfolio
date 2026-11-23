@@ -1,5 +1,4 @@
-/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+/* Fonts are self-hosted via next/font in app/layout.tsx (CSS vars --font-sans / --font-display). */
 
 /* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
 @tailwind base;
@@ -28,14 +27,14 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 ::selection {
   background: rgba(0, 82, 255, 0.15);
   color: #0052ff;
 }
 .font-display {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-family: var(--font-display), system-ui, sans-serif;
 }
 /* Gradient text */
 .text-gradient {
@@ -107,6 +106,28 @@ body {
   50% { transform: translate3d(40px, -30px, 0) scale(1.15); }
 }
 .animate-drift { animation: drift 18s ease-in-out infinite; }
+/* Entrance animations — CSS-only so content shows on first paint, before JS loads.
+   Stagger with an inline animation-delay. */
+@keyframes fade-up {
+  from { opacity: 0; transform: translate3d(0, var(--fade-y, 20px), 0); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fade-up { animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes page-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: none; }
+}
+.animate-page-in { animation: page-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 6s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--bg); }

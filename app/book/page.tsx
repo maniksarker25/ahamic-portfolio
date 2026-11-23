@@ -1,22 +1,16 @@
-'use client';
-
-
-
-
-
-
-
-
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { CalendarIcon, ClockIcon, CheckIcon, ArrowUpRightIcon } from 'lucide-react';
+import React from 'react';
+import { CalendarIcon, ClockIcon, CheckIcon } from 'lucide-react';
 import { PageHero } from '../../components/shared/PageHero';
 import { Section } from '../../components/shared/Section';
 import { Reveal } from '../../components/shared/Reveal';
-import { cn } from '../../lib/cn';
+import { BookingForm } from '../../components/forms/BookingForm';
+import { pageMetadata } from '../../lib/seo';
 
-const days = ['Mon 21', 'Tue 22', 'Wed 23', 'Thu 24', 'Fri 25'];
-const times = ['9:00 AM', '10:30 AM', '1:00 PM', '2:30 PM', '4:00 PM'];
+export const metadata = pageMetadata({
+  title: 'Book a Free Consultation',
+  description: 'Book a free 30-minute call with a senior lead — honest feedback on your idea or roadmap and clear next steps.',
+  path: '/book'
+});
 
 const included = [
 'A 30-minute call with a senior lead',
@@ -25,10 +19,6 @@ const included = [
 
 
 export default function Book() {
-  const router = useRouter();
-  const [day, setDay] = useState(days[2]);
-  const [time, setTime] = useState(times[1]);
-
   return (
     <>
       <PageHero
@@ -36,7 +26,6 @@ export default function Book() {
         eyebrow="Free consultation"
         title={<>Book 30 minutes<br />with a senior lead.</>}
         subtitle="No sales script. Just a focused conversation about where you want to go and how to get there." />
-      
 
       <Section className="pt-16">
         <div className="grid gap-8 lg:grid-cols-12">
@@ -45,7 +34,7 @@ export default function Book() {
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent/15 text-accent-soft">
                 <CalendarIcon className="h-6 w-6" />
               </span>
-              <h3 className="mt-6 font-display text-xl font-semibold text-ink">Strategy consultation</h3>
+              <h2 className="mt-6 font-display text-xl font-semibold text-ink">Strategy consultation</h2>
               <p className="mt-2 flex items-center gap-2 text-sm text-muted"><ClockIcon className="h-4 w-4" /> 30 minutes · Video call</p>
               <ul className="mt-6 space-y-3">
                 {included.map((item) =>
@@ -55,65 +44,15 @@ export default function Book() {
                   </li>
                 )}
               </ul>
+              <p className="mt-6 text-xs text-muted">
+                We’ll confirm your slot by email within one business day.
+              </p>
             </div>
           </div>
 
           <div className="lg:col-span-7">
             <Reveal>
-              <form
-                onSubmit={(e) => {e.preventDefault();router.push('/thank-you');}}
-                className="rounded-3xl border border-border bg-card p-8">
-                
-                <div>
-                  <p className="mb-3 text-sm font-medium text-ink">Pick a day</p>
-                  <div className="grid grid-cols-5 gap-2">
-                    {days.map((d) =>
-                    <button
-                      type="button"
-                      key={d}
-                      onClick={() => setDay(d)}
-                      className={cn(
-                        'rounded-2xl border px-2 py-3 text-sm font-medium transition-colors',
-                        day === d ? 'border-accent bg-accent/15 text-ink' : 'border-border bg-surface text-muted hover:text-ink'
-                      )}>
-                      
-                        {d}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <p className="mb-3 text-sm font-medium text-ink">Pick a time</p>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {times.map((t) =>
-                    <button
-                      type="button"
-                      key={t}
-                      onClick={() => setTime(t)}
-                      className={cn(
-                        'rounded-2xl border px-3 py-3 text-sm font-medium transition-colors',
-                        time === t ? 'border-accent bg-accent/15 text-ink' : 'border-border bg-surface text-muted hover:text-ink'
-                      )}>
-                      
-                        {t}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <input required placeholder="Full name" className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-ink placeholder:text-muted focus:border-accent/60 focus:outline-none" aria-label="Full name" />
-                  <input required type="email" placeholder="Work email" className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-ink placeholder:text-muted focus:border-accent/60 focus:outline-none" aria-label="Work email" />
-                </div>
-
-                <div className="mt-6 flex items-center justify-between gap-4">
-                  <p className="text-sm text-muted">Selected: <span className="text-ink">{day} · {time}</span></p>
-                  <button type="submit" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-bg hover:bg-slate-800">
-                    Confirm booking <ArrowUpRightIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </form>
+              <BookingForm />
             </Reveal>
           </div>
         </div>

@@ -1,18 +1,17 @@
-'use client';
-
-
-
-
-
-
-
-
-
 import React from 'react';
-import { motion } from 'framer-motion';
 import { CheckIcon } from 'lucide-react';
 import { Aurora } from '../../components/shared/Aurora';
 import { MagneticButton } from '../../components/shared/MagneticButton';
+import { pageMetadata } from '../../lib/seo';
+
+export const metadata = pageMetadata({
+  title: 'Thank You',
+  description: 'We have received your message and will be in touch within one business day.',
+  path: '/thank-you',
+  noIndex: true
+});
+
+const delay = (s: number) => ({ animationDelay: `${s}s`, ['--fade-y' as string]: '16px' }) as React.CSSProperties;
 
 export default function ThankYou() {
   return (
@@ -20,39 +19,19 @@ export default function ThankYou() {
       <div className="absolute inset-0 bg-grid bg-grid-fade" aria-hidden />
       <Aurora />
       <div className="relative z-10 flex flex-col items-center text-center">
-        <motion.span
-          initial={{ scale: 0, rotate: -20 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 14 }}
-          className="grid h-20 w-20 place-items-center rounded-full bg-accent/20 text-accent-soft shadow-glow">
-          
+        <span className="animate-fade-up grid h-20 w-20 place-items-center rounded-full bg-accent/20 text-accent-soft shadow-glow">
           <CheckIcon className="h-9 w-9" />
-        </motion.span>
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mt-8 font-display text-4xl font-semibold tracking-tight text-ink md:text-6xl">
-          
+        </span>
+        <h1 className="animate-fade-up mt-8 font-display text-4xl font-semibold tracking-tight text-ink md:text-6xl" style={delay(0.15)}>
           Thank you.
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="mt-5 max-w-md text-base text-muted md:text-lg">
-          
+        </h1>
+        <p className="animate-fade-up mt-5 max-w-md text-base text-muted md:text-lg" style={delay(0.25)}>
           We have got your message and a senior lead will be in touch within one business day. Keep an eye on your inbox.
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="mt-10 flex flex-col gap-3 sm:flex-row">
-          
+        </p>
+        <div className="animate-fade-up mt-10 flex flex-col gap-3 sm:flex-row" style={delay(0.35)}>
           <MagneticButton to="/" variant="primary">Back to home</MagneticButton>
           <MagneticButton to="/portfolio" variant="ghost">Explore our work</MagneticButton>
-        </motion.div>
+        </div>
       </div>
     </section>);
 

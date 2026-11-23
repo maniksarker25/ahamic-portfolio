@@ -22,16 +22,28 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => setOpen(false), [pathname]);
+  // Close the mobile menu on navigation (adjusting state during render, no effect needed) and on Escape.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    setOpen(false);
+  }
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-      <motion.nav
-        initial={{ y: -24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      <nav
+        aria-label="Main"
+        style={{ ['--fade-y' as string]: '-24px' }}
         className={cn(
-          'flex w-full max-w-container items-center justify-between rounded-full px-5 py-2.5 transition-all duration-300 bg-white/80 text-slate-900 backdrop-blur-xl border border-slate-200/80 shadow-[0_4px_25px_-5px_rgba(15,23,42,0.06)]',
+          'animate-fade-up flex w-full max-w-container items-center justify-between rounded-full px-5 py-2.5 transition-all duration-300 bg-white/80 text-slate-900 backdrop-blur-xl border border-slate-200/80 shadow-[0_4px_25px_-5px_rgba(15,23,42,0.06)]',
           scrolled ? 'border-slate-300/80 shadow-[0_8px_30px_-5px_rgba(15,23,42,0.1)] bg-white/90' : ''
         )}>
         
@@ -39,11 +51,12 @@ export function Navbar() {
 
         <ul className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
-            const active = pathname === link.to;
+            const active = isActive(link.to);
             return (
               <li key={link.to}>
                 <Link
                   href={link.to}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
                     'relative rounded-full px-4 py-2 text-sm font-medium transition-colors',
                     active ? 'text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-900'
@@ -74,15 +87,17 @@ export function Navbar() {
           className="grid h-10 w-10 place-items-center rounded-full text-slate-700 hover:text-slate-900 md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}>
+          aria-expanded={open}
+          aria-controls="mobile-menu">
           
           {open ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
         </button>
-      </motion.nav>
+      </nav>
 
       <AnimatePresence>
         {open &&
         <motion.div
+          id="mobile-menu"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
@@ -94,6 +109,7 @@ export function Navbar() {
             <li key={link.to}>
                   <Link
                 href={link.to}
+                aria-current={isActive(link.to) ? 'page' : undefined}
                 className="block rounded-2xl px-4 py-3 text-base font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900">
                 
                     {link.label}

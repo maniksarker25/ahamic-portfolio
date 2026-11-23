@@ -1,5 +1,7 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { pageMetadata } from '../../../lib/seo';
 import { PageHero } from '../../../components/shared/PageHero';
 import { Section } from '../../../components/shared/Section';
 
@@ -37,6 +39,15 @@ const DOCS: Record<string, {title: string;intro: string;sections: {h: string;p: 
 
 export function generateStaticParams() {
   return Object.keys(DOCS).map((doc) => ({ doc }));
+}
+
+export const dynamicParams = false;
+
+export async function generateMetadata({ params }: {params: Promise<{doc: string;}>;}): Promise<Metadata> {
+  const { doc } = await params;
+  const content = DOCS[doc];
+  if (!content) return {};
+  return pageMetadata({ title: content.title, description: content.intro, path: `/legal/${doc}` });
 }
 
 export default async function Legal({

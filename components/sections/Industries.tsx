@@ -1,8 +1,3 @@
-
-
-
-
-
 import React from 'react';
 import { Section, SectionHeading } from '../shared/Section';
 import { Reveal } from '../shared/Reveal';

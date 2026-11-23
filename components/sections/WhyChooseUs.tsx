@@ -1,7 +1,3 @@
-
-
-
-
 import React from 'react';
 import { CheckIcon } from 'lucide-react';
 import { Section, SectionHeading } from '../shared/Section';

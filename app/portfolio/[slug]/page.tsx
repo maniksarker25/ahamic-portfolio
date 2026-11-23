@@ -1,5 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ArrowLeftIcon, QuoteIcon } from 'lucide-react';
 import { PageHero } from '../../../components/shared/PageHero';
@@ -7,7 +9,8 @@ import { Section, SectionHeading } from '../../../components/shared/Section';
 import { Reveal } from '../../../components/shared/Reveal';
 import { CTA } from '../../../components/sections/CTA';
 import { PROJECTS } from '../../../constants/site';
-import { img } from '../../../constants/images';
+import { IMAGES } from '../../../constants/images';
+import { pageMetadata } from '../../../lib/seo';
 
 const SECTIONS = [
 { title: 'The challenge', body: 'The client came to us with a system straining under growth — slow, brittle, and difficult to extend. Users were frustrated and the roadmap was stalled.' },
@@ -20,6 +23,17 @@ const STACK = ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'AWS', 'Tailwind'
 
 export function generateStaticParams() {
   return PROJECTS.map((p) => ({ slug: p.slug }));
+}
+
+export const dynamicParams = false;
+
+export async function generateMetadata({ params }: {params: Promise<{slug: string;}>;}): Promise<Metadata> {
+  const { slug } = await params;
+  const project = PROJECTS.find((p) => p.slug === slug);
+  if (!project) return {};
+  const meta = pageMetadata({ title: project.title, description: project.summary, path: `/portfolio/${project.slug}` });
+  const image = IMAGES[project.image];
+  return { ...meta, openGraph: { ...meta.openGraph, images: [{ url: image.src, width: image.width, height: image.height }] } };
 }
 
 export default async function PortfolioDetail({
@@ -41,7 +55,14 @@ export default async function PortfolioDetail({
       <Section className="pt-16">
         <Reveal>
           <div className="gradient-border overflow-hidden rounded-3xl shadow-glow">
-            <img src={img(project.image)} alt={`${project.client} platform`} className="w-full" loading="lazy" />
+            <Image
+              src={IMAGES[project.image].src}
+              width={IMAGES[project.image].width}
+              height={IMAGES[project.image].height}
+              alt={`${project.client} — ${project.title}`}
+              sizes="(min-width: 1200px) 1152px, 100vw"
+              priority
+              className="h-auto w-full" />
           </div>
         </Reveal>
 
@@ -85,7 +106,7 @@ export default async function PortfolioDetail({
           <figure className="gradient-border rounded-3xl p-8">
             <QuoteIcon className="h-8 w-8 text-accent/40" />
             <blockquote className="mt-4 text-lg leading-relaxed text-ink">
-              "Ahamic delivered exactly what they promised, on time, and left us stronger than they found us. We would work with them again in a heartbeat."
+              “Ahamic delivered exactly what they promised, on time, and left us stronger than they found us. We would work with them again in a heartbeat.”
             </blockquote>
             <figcaption className="mt-5 text-sm text-muted">— Product leadership, {project.client}</figcaption>
           </figure>

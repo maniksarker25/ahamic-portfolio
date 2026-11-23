@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React from 'react';
 import { CheckIcon } from 'lucide-react';
 import { PageHero } from '../../components/shared/PageHero';
@@ -14,6 +8,13 @@ import { FAQ } from '../../components/sections/FAQ';
 import { CTA } from '../../components/sections/CTA';
 import { PRICING } from '../../constants/site';
 import { cn } from '../../lib/cn';
+import { pageMetadata } from '../../lib/seo';
+
+export const metadata = pageMetadata({
+  title: "Pricing",
+  description: "Transparent ways to work with Ahamic Solutions — from a focused design sprint to a dedicated product team or long-term partnership.",
+  path: "/pricing"
+});
 
 export default function Pricing() {
   return (

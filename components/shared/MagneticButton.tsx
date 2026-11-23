@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import Link from 'next/link';
 import { cn } from '../../lib/cn';
 
@@ -9,22 +9,33 @@ type Variant = 'primary' | 'ghost';
 
 type MagneticButtonProps = {
   children: React.ReactNode;
+  /** Internal route (rendered with next/link) */
   to?: string;
+  /** External URL */
   href?: string;
   onClick?: () => void;
   variant?: Variant;
   className?: string;
   type?: 'button' | 'submit';
+  disabled?: boolean;
 };
 
 const base =
-'group relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none';
+'group relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-500/30',
   ghost: 'border border-slate-300 bg-white/90 text-slate-800 hover:border-indigo-300 hover:bg-indigo-50/60 shadow-sm backdrop-blur'
 };
 
+const spring = { stiffness: 250, damping: 18, mass: 0.4 };
+
+const MotionLink = motion.create(Link);
+
+/**
+ * Button / link that is gently pulled toward the cursor.
+ * Uses motion values, so mouse movement never triggers a React re-render.
+ */
 export function MagneticButton({
   children,
   to,
@@ -32,38 +43,50 @@ export function MagneticButton({
   onClick,
   variant = 'primary',
   className,
-  type = 'button'
+  type = 'button',
+  disabled
 }: MagneticButtonProps) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const ref = useRef<HTMLElement>(null);
+  const x = useSpring(useMotionValue(0), spring);
+  const y = useSpring(useMotionValue(0), spring);
 
   function handleMove(e: React.MouseEvent) {
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
-    const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
-    setPos({ x, y });
+    x.set((e.clientX - rect.left - rect.width / 2) * 0.3);
+    y.set((e.clientY - rect.top - rect.height / 2) * 0.3);
   }
 
-  const inner =
-  <motion.span
-    ref={ref}
-    onMouseMove={handleMove}
-    onMouseLeave={() => setPos({ x: 0, y: 0 })}
-    animate={{ x: pos.x, y: pos.y }}
-    transition={{ type: 'spring', stiffness: 250, damping: 18, mass: 0.4 }}
-    className={cn(base, variants[variant], className)}>
-    
-      {children}
-    </motion.span>;
+  function reset() {
+    x.set(0);
+    y.set(0);
+  }
 
+  const shared = {
+    onMouseMove: handleMove,
+    onMouseLeave: reset,
+    style: { x, y },
+    className: cn(base, variants[variant], disabled && 'pointer-events-none opacity-60', className)
+  };
 
-  if (to) return <Link href={to}>{inner}</Link>;
-  if (href) return <a href={href}>{inner}</a>;
+  if (to) {
+    return (
+      <MotionLink {...shared} ref={ref as React.Ref<HTMLAnchorElement>} href={to}>
+        {children}
+      </MotionLink>);
+
+  }
+  if (href) {
+    return (
+      <motion.a {...shared} ref={ref as React.Ref<HTMLAnchorElement>} href={href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </motion.a>);
+
+  }
   return (
-    <button type={type} onClick={onClick} className="contents">
-      {inner}
-    </button>);
+    <motion.button {...shared} ref={ref as React.Ref<HTMLButtonElement>} type={type} onClick={onClick} disabled={disabled}>
+      {children}
+    </motion.button>);
 
 }

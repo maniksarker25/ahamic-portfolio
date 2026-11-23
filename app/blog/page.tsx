@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRightIcon, ClockIcon } from 'lucide-react';
@@ -14,6 +6,13 @@ import { Section } from '../../components/shared/Section';
 import { Reveal } from '../../components/shared/Reveal';
 import { CTA } from '../../components/sections/CTA';
 import { BLOG } from '../../constants/site';
+import { pageMetadata } from '../../lib/seo';
+
+export const metadata = pageMetadata({
+  title: "Blog",
+  description: "Practical writing on design, engineering, and shipping software that lasts, from the Ahamic Solutions team.",
+  path: "/blog"
+});
 
 export default function Blog() {
   return (

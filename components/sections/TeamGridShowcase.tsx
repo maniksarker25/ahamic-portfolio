@@ -1,88 +1,157 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { IMAGES } from '../../constants/images';
+import { STATS as SITE_STATS } from '../../constants/site';
 
 /*
- ╔══════════════════════════════════════════════════════════════════════════╗
- ║  TeamGridShowcase — Pixel-exact Vivasoft 7-column mosaic               ║
- ║                                                                          ║
- ║  REFERENCE MATCH: 7-column grid                                          ║
- ║  Col 1: [tall photo] + [group photo]    — 560px, clips 80px above       ║
- ║  Col 2: [Blue "Top Talents 300+"] +                                       ║
- ║          [Pink "Projects 100+"]         — 480px, fills container         ║
- ║  Col 3: [Woman portrait]               — 420px, 60px gap at top         ║
- ║  Col 4: CENTER arch photo              — 540px, arch peak               ║
- ║  Col 5: [Mint "Experience 10+"] +                                         ║
- ║          [dev photo]                   — 480px, fills container          ║
- ║  Col 6: [portrait|TechStack 180+] top +                                   ║
- ║          [team photo] bottom           — 480px, fills container          ║
- ║  Col 7: single tall portrait           — 480px, full height              ║
- ╚══════════════════════════════════════════════════════════════════════════╝
+  TeamGridShowcase — staggered "arch" mosaic shown under the hero CTAs.
+
+  Desktop (lg+): every tile is absolutely positioned inside a fixed-aspect
+  canvas (DESIGN_W x DESIGN_H). Positions are expressed as percentages of that
+  canvas and radii / font sizes in container-query units (cqw), so the whole
+  mosaic scales proportionally with the viewport. All columns share the same
+  bottom edge; their tops are staggered, and each tile has one large rounded
+  corner.
+
+  Mobile / tablet (<lg): a simpler two-column version with the same styling.
+
+  To change photos, edit PHOTOS below (add files to /public and register them in constants/images.ts).
+  The four stat cards show the same numbers as the Stats section (constants/site.ts → STATS).
 */
 
+const DESIGN_W = 1861;
+const DESIGN_H = 592;
+
 /* ── Photos ─────────────────────────────────────────────────────────────── */
-const PH = {
-  desk:  '/team_dev_1.jpg',
-  woman: '/team_dev_2.jpg',
-  pair:  '/team_dev_3.jpg',
-  team:  '/ahamic_team_collaboration.jpg',
+const SRC = {
+  dev: IMAGES.TEAM_DEV.src,
+  designer: IMAGES.TEAM_DESIGNER.src,
+  pair: IMAGES.TEAM_PAIR.src,
+  team: IMAGES.TEAM_COLLABORATION.src,
 };
 
-/* ── Asymmetric border-radii (Vivasoft style: 1 large corner per element) ─ */
-const R = {
-  TR:   '0.85rem 3.5rem 0.85rem 0.85rem',
-  TL:   '3.5rem 0.85rem 0.85rem 0.85rem',
-  ARCH: '4rem 4rem 0.85rem 0.85rem',
-  TR_s: '0.85rem 2rem 0.85rem 0.85rem',
-  TL_s: '2rem 0.85rem 0.85rem 0.85rem',
-};
-
-/* ── Shared image fill ───────────────────────────────────────────────────── */
-const imgBase: React.CSSProperties = {
-  display: 'block', width: '100%', height: '100%',
-  objectFit: 'cover', objectPosition: 'center top',
-};
-
-/* ── Stat card ───────────────────────────────────────────────────────────── */
-interface CardProps {
-  bg: string; lc: string; nc: string;
-  label: string; num: string;
-  radius: string; style?: React.CSSProperties;
+interface Photo {
+  src: string;
+  alt: string;
+  /** focal point, used for both object-position and zoom origin */
+  pos?: string;
+  /** optional zoom (1 = none) to show a different crop of a reused photo */
+  zoom?: number;
 }
-function Card({ bg, lc, nc, label, num, radius, style = {} }: CardProps) {
+
+const PHOTOS: Record<string, Photo> = {
+  leftTall:    { src: SRC.dev,      alt: 'Developer working at his desk', pos: '70% 50%' },
+  leftWide:    { src: SRC.team,     alt: 'Team planning session',         pos: 'center 60%' },
+  portraitA:   { src: SRC.designer, alt: 'Product designer',              pos: '50% 38%', zoom: 1.6 },
+  centerTall:  { src: SRC.pair,     alt: 'Engineers reviewing code',      pos: '55% 60%' },
+  smallWide:   { src: SRC.team,     alt: 'Engineers discussing',          pos: '78% 45%', zoom: 1.5 },
+  portraitB:   { src: SRC.pair,     alt: 'Software engineer',             pos: '92% 45%', zoom: 2 },
+  rightWide:   { src: SRC.team,     alt: 'Team collaborating on laptops', pos: '30% 60%', zoom: 1.5 },
+  rightTall:   { src: SRC.designer, alt: 'Team member at work',           pos: '50% 50%' },
+  rightSquare: { src: SRC.dev,      alt: 'Developer coding',              pos: '68% 48%', zoom: 1.7 },
+};
+
+/* ── Stats ──────────────────────────────────────────────────────────────── */
+type Stat = { label: string; value: string; bg: string };
+
+/** Card for one entry of constants/site.ts → STATS (matched by label). */
+function stat(label: string, bg: string): Stat {
+  const s = SITE_STATS.find((x) => x.label === label);
+  return { label, value: s ? `${s.value}${s.suffix}` : '—', bg };
+}
+
+const STATS = {
+  team:         stat('Team members', '#cfe9fb'),
+  projects:     stat('Projects completed', '#fdd8ef'),
+  experience:   stat('Years experience', '#d7fbe8'),
+  satisfaction: stat('Client satisfaction', '#dcd5fd'),
+};
+
+type Corner = 'tl' | 'tr';
+
+/* ── Desktop layout (design-space pixels) ───────────────────────────────── */
+type Tile =
+  | { kind: 'photo'; photo: Photo; x: number; y: number; w: number; h: number; corner: Corner; r: number; col: number }
+  | { kind: 'stat'; stat: Stat; x: number; y: number; w: number; h: number; corner: Corner; r: number; col: number };
+
+const TILES: Tile[] = [
+  // col 1–2
+  { kind: 'photo', photo: PHOTOS.leftTall,  x: 0,    y: 0,   w: 229, h: 356, corner: 'tl', r: 80,  col: 0 },
+  { kind: 'stat',  stat: STATS.team,         x: 245,  y: 148, w: 201, h: 208, corner: 'tr', r: 110, col: 1 },
+  { kind: 'photo', photo: PHOTOS.leftWide,  x: 0,    y: 373, w: 458, h: 219, corner: 'tr', r: 80,  col: 0 },
+  // col 3
+  { kind: 'photo', photo: PHOTOS.portraitA, x: 478,  y: 182, w: 214, h: 177, corner: 'tr', r: 90,  col: 2 },
+  { kind: 'stat',  stat: STATS.projects,    x: 478,  y: 376, w: 214, h: 216, corner: 'tr', r: 120, col: 2 },
+  // col 4 (centre)
+  { kind: 'photo', photo: PHOTOS.centerTall,x: 712,  y: 151, w: 235, h: 441, corner: 'tr', r: 110, col: 3 },
+  // col 5
+  { kind: 'stat',  stat: STATS.experience,  x: 967,  y: 241, w: 214, h: 208, corner: 'tl', r: 110, col: 4 },
+  { kind: 'photo', photo: PHOTOS.smallWide, x: 967,  y: 466, w: 214, h: 126, corner: 'tr', r: 60,  col: 4 },
+  // col 6
+  { kind: 'photo', photo: PHOTOS.portraitB, x: 1201, y: 135, w: 223, h: 187, corner: 'tl', r: 90,  col: 5 },
+  { kind: 'stat',  stat: STATS.satisfaction, x: 1440, y: 113, w: 190, h: 209, corner: 'tr', r: 100, col: 5 },
+  { kind: 'photo', photo: PHOTOS.rightWide, x: 1201, y: 339, w: 429, h: 253, corner: 'tr', r: 80,  col: 5 },
+  // col 7
+  { kind: 'photo', photo: PHOTOS.rightTall,  x: 1650, y: 16,  w: 211, h: 349, corner: 'tl', r: 100, col: 6 },
+  { kind: 'photo', photo: PHOTOS.rightSquare,x: 1650, y: 382, w: 211, h: 210, corner: 'tr', r: 70,  col: 6 },
+];
+
+const pctX = (v: number) => `${(v / DESIGN_W) * 100}%`;
+const pctY = (v: number) => `${(v / DESIGN_H) * 100}%`;
+const cqw = (px: number) => `${(px / DESIGN_W) * 100}cqw`;
+
+function radius(corner: Corner, big: string, small = '4px') {
+  return corner === 'tl'
+    ? `${big} ${small} ${small} ${small}`
+    : `${small} ${big} ${small} ${small}`;
+}
+
+/* ── Building blocks ────────────────────────────────────────────────────── */
+/** `sizes` tells the browser which resized version to download for this tile. */
+function PhotoFill({ photo, sizes }: { photo: Photo; sizes: string }) {
+  const zoom = photo.zoom ?? 1;
   return (
-    <div style={{
-      background: bg,
-      borderRadius: radius,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      padding: '0 24px 26px',
-      boxSizing: 'border-box',
-      ...style,
-    }}>
-      <span style={{
-        fontSize: 13,
-        fontWeight: 600,
-        color: lc,
-        display: 'block',
-        marginBottom: 6,
-        letterSpacing: '0.03em',
-        textTransform: 'uppercase' as const,
-        fontFamily: 'Inter, system-ui, sans-serif',
-      }}>
-        {label}
+    <Image
+      src={photo.src}
+      alt={photo.alt}
+      fill
+      sizes={sizes}
+      draggable={false}
+      className="object-cover transition-transform duration-700 ease-out [transform:scale(var(--z))] group-hover:[transform:scale(calc(var(--z)*1.05))]"
+      style={{
+        objectPosition: photo.pos ?? 'center',
+        transformOrigin: photo.pos ?? 'center',
+        ['--z' as string]: zoom,
+      }}
+    />
+  );
+}
+
+function StatFill({
+  stat,
+  labelSize,
+  valueSize,
+}: {
+  stat: Stat;
+  labelSize: string;
+  valueSize: string;
+}) {
+  return (
+    <div
+      className="flex h-full w-full flex-col justify-start"
+      style={{ background: stat.bg, padding: '40% 16% 0' }}
+    >
+      <span className="font-sans font-medium text-slate-700" style={{ fontSize: labelSize, lineHeight: 1.3 }}>
+        {stat.label}
       </span>
-      <span style={{
-        fontSize: '3rem',
-        fontWeight: 700,
-        color: nc,
-        lineHeight: 1,
-        fontFamily: '"Space Grotesk", system-ui, sans-serif',
-        letterSpacing: '-0.02em',
-      }}>
-        {num}
+      <span
+        className="font-display font-medium text-slate-900"
+        style={{ fontSize: valueSize, lineHeight: 1.1, letterSpacing: '-0.01em', marginTop: '0.15em' }}
+      >
+        {stat.value}
       </span>
     </div>
   );
@@ -92,132 +161,74 @@ function Card({ bg, lc, nc, label, num, radius, style = {} }: CardProps) {
 export function TeamGridShowcase() {
   return (
     <>
-
       {/* ━━━━━━━━━━━━━━━━  DESKTOP  (lg and above)  ━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden lg:block w-full"
-        style={{ height: 480, overflow: 'hidden' }}
-      >
-        <div style={{
-          display: 'grid',
-          /* 7 columns — exact Vivasoft proportions */
-          gridTemplateColumns: '1.1fr 0.85fr 1fr 1.2fr 0.65fr 1.1fr 1.0fr',
-          gap: 8,
-          width: '100%',
-          height: '100%',
-          alignItems: 'end',
-        }}>
-
-          {/* COL 1 — tall flanking photo + group photo */}
-          <div style={{ height: 560, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ flex: 1, overflow: 'hidden', borderRadius: R.TR }}>
-              <img src={PH.desk} alt="Developer at desk"
-                style={{ ...imgBase, objectPosition: 'center 20%' }} />
-            </div>
-            <div style={{ height: 185, overflow: 'hidden', borderRadius: R.TL }}>
-              <img src={PH.team} alt="Team meeting" style={imgBase} />
-            </div>
-          </div>
-
-          {/* COL 2 — Blue "Top Talents 300+" + Pink "Projects 100+" */}
-          <div style={{ height: 480, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <Card bg="#dbeafe" lc="#1e40af" nc="#1d4ed8" label="Top Talents" num="300+"
-              radius={R.TR} style={{ flex: 1 }} />
-            <Card bg="#fce7f3" lc="#be185d" nc="#db2777" label="Projects" num="100+"
-              radius={R.TR} style={{ flex: 1 }} />
-          </div>
-
-          {/* COL 3 — woman portrait (shorter, space at top) */}
-          <div style={{ height: 420, overflow: 'hidden', borderRadius: R.TR }}>
-            <img src={PH.woman} alt="Team member" style={{ ...imgBase, objectPosition: 'center top' }} />
-          </div>
-
-          {/* COL 4 — CENTER arch (tallest, overflows top to create arch peak) */}
-          <div style={{ height: 540, overflow: 'hidden', borderRadius: R.ARCH }}>
-            <img src={PH.pair} alt="Engineers collaborating"
-              style={{ ...imgBase, objectPosition: 'center center' }} />
-          </div>
-
-          {/* COL 5 — Mint "Experience 10+" card + dev photo */}
-          <div style={{ height: 480, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <Card bg="#d1fae5" lc="#047857" nc="#059669" label="Experience" num="10+"
-              radius={R.TR} style={{ height: 175 }} />
-            <div style={{ flex: 1, overflow: 'hidden', borderRadius: R.TL }}>
-              <img src={PH.desk} alt="Developer" style={{ ...imgBase, objectPosition: 'center 40%' }} />
-            </div>
-          </div>
-
-          {/* COL 6 — [portrait | Tech Stack 180+] top + [team discussion] bottom */}
-          <div style={{ height: 480, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ height: 178, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div style={{ overflow: 'hidden', borderRadius: R.TL_s }}>
-                <img src={PH.woman} alt="Team member" style={{ ...imgBase, objectPosition: 'center top' }} />
-              </div>
-              <div style={{
-                background: '#ede9fe',
-                borderRadius: R.TR_s,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                justifyContent: 'flex-end',
-                padding: '0 14px 16px',
-                boxSizing: 'border-box',
-              }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#6d28d9', display: 'block', marginBottom: 5, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
-                  Tech Stack
-                </span>
-                <span style={{ fontSize: '2.1rem', fontWeight: 700, color: '#7c3aed', lineHeight: 1, fontFamily: '"Space Grotesk", system-ui, sans-serif', letterSpacing: '-0.02em' }}>
-                  180+
-                </span>
-              </div>
-            </div>
-            <div style={{ flex: 1, overflow: 'hidden', borderRadius: R.TR }}>
-              <img src={PH.team} alt="Team discussion" style={imgBase} />
-            </div>
-          </div>
-
-          {/* COL 7 — single tall portrait (right flank) */}
-          <div style={{ height: 480, overflow: 'hidden', borderRadius: R.TL }}>
-            <img src={PH.pair} alt="Engineer" style={{ ...imgBase, objectPosition: 'center 20%' }} />
-          </div>
-
+      <div className="hidden w-full px-4 lg:block">
+        <div
+          className="relative w-full"
+          style={{ aspectRatio: `${DESIGN_W} / ${DESIGN_H}`, containerType: 'inline-size' }}
+        >
+          {TILES.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.9, delay: 0.15 + t.col * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              className="group absolute overflow-hidden"
+              style={{
+                left: pctX(t.x),
+                top: pctY(t.y),
+                width: pctX(t.w),
+                height: pctY(t.h),
+                borderRadius: radius(t.corner, cqw(t.r)),
+              }}
+            >
+              {t.kind === 'photo' ? (
+                <PhotoFill photo={t.photo} sizes={`${Math.ceil((t.w / DESIGN_W) * 100)}vw`} />
+              ) : (
+                <StatFill
+                  stat={t.stat}
+                  labelSize={`clamp(12px, ${cqw(18)}, 22px)`}
+                  valueSize={`clamp(28px, ${cqw(52)}, 64px)`}
+                />
+              )}
+            </motion.div>
+          ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* ━━━━━━━━━━━━━━━━  TABLET / MOBILE  (<lg)  ━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="lg:hidden w-full"
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="grid w-full grid-cols-2 gap-3 px-4 pb-12 sm:grid-cols-3 lg:hidden"
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '0 8px 48px' }}>
-          {/* row 1 */}
-          <div style={{ height: 200, overflow: 'hidden', borderRadius: R.TR }}>
-            <img src={PH.desk} alt="Developer" style={{ ...imgBase, objectPosition: 'center 20%' }} />
+        {[
+          { type: 'photo', photo: PHOTOS.leftTall,   corner: 'tl' as Corner, h: 'h-56' },
+          { type: 'stat',  stat: STATS.team,         corner: 'tr' as Corner, h: 'h-56' },
+          { type: 'photo', photo: PHOTOS.centerTall, corner: 'tr' as Corner, h: 'h-56' },
+          { type: 'stat',  stat: STATS.projects,     corner: 'tr' as Corner, h: 'h-48' },
+          { type: 'photo', photo: PHOTOS.rightTall,  corner: 'tl' as Corner, h: 'h-48' },
+          { type: 'stat',  stat: STATS.experience,   corner: 'tl' as Corner, h: 'h-48' },
+          { type: 'photo', photo: PHOTOS.portraitA,  corner: 'tr' as Corner, h: 'h-44' },
+          { type: 'stat',  stat: STATS.satisfaction, corner: 'tr' as Corner, h: 'h-44' },
+          { type: 'photo', photo: PHOTOS.leftWide,   corner: 'tl' as Corner, h: 'h-44' },
+        ].map((t, i) => (
+          <div
+            key={i}
+            className={`group relative overflow-hidden ${t.h} ${i === 8 ? 'col-span-2 sm:col-span-1' : ''}`}
+            style={{ borderRadius: radius(t.corner, '4rem') }}
+          >
+            {t.type === 'photo' && t.photo ? (
+              <PhotoFill photo={t.photo} sizes={i === 8 ? '(min-width: 640px) 33vw, 100vw' : '(min-width: 640px) 33vw, 50vw'} />
+            ) : t.stat ? (
+              <StatFill stat={t.stat} labelSize="14px" valueSize="2.25rem" />
+            ) : null}
           </div>
-          <Card bg="#dbeafe" lc="#1e40af" nc="#1d4ed8" label="Top Talents" num="300+" radius={R.TR} style={{ height: 200 }} />
-          {/* row 2 */}
-          <Card bg="#fce7f3" lc="#be185d" nc="#db2777" label="Projects" num="100+" radius={R.TL} style={{ height: 180 }} />
-          <div style={{ overflow: 'hidden', borderRadius: R.TR, height: 180 }}>
-            <img src={PH.woman} alt="Team member" style={{ ...imgBase, objectPosition: 'center top' }} />
-          </div>
-          {/* row 3 */}
-          <div style={{ height: 200, overflow: 'hidden', borderRadius: R.TL }}>
-            <img src={PH.pair} alt="Pair programming" style={imgBase} />
-          </div>
-          <Card bg="#d1fae5" lc="#047857" nc="#059669" label="Experience" num="10+" radius={R.TR} style={{ height: 200 }} />
-          {/* row 4 */}
-          <Card bg="#ede9fe" lc="#6d28d9" nc="#7c3aed" label="Tech Stack" num="180+" radius={R.TR} style={{ height: 160 }} />
-          <div style={{ overflow: 'hidden', borderRadius: R.TL, height: 160 }}>
-            <img src={PH.team} alt="Team" style={imgBase} />
-          </div>
-        </div>
+        ))}
       </motion.div>
-
     </>
   );
 }

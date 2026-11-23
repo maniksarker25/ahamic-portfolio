@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Section } from '../shared/Section';
 import { Reveal } from '../shared/Reveal';
-import { GlobeIcon, MapPinIcon, SparklesIcon, UsersIcon } from 'lucide-react';
+import { GlobeIcon, SparklesIcon, UsersIcon } from 'lucide-react';
 
 interface ClientCountry {
   id: string;
@@ -33,11 +33,34 @@ const CLIENT_COUNTRIES: ClientCountry[] = [
   { id: 'br', name: 'Brazil', flag: '🇧🇷', x: 265, y: 550, clients: 2, text: 'Agritech integrations & payment systems.', region: 'South America' },
 ];
 
+// SVG viewBox: 30.767 241.591 784.077 458.627 — convert map coordinates to container percentages.
+function getCoordinates(x: number, y: number) {
+  const left = ((x - 30.767) / 784.077) * 100;
+  const top = ((y - 241.591) / 458.627) * 100;
+  return { left: `${left}%`, top: `${top}%` };
+}
+
+/** Static styles for the injected SVG: base land colour + highlighted client countries. */
+const BASE_MAP_CSS = `
+  #world-map { width: 100%; height: 100%; }
+  #world-map path {
+    fill: #cbd5e1;
+    stroke: #94a3b8;
+    stroke-width: 0.8px;
+    transition: fill 0.3s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+${CLIENT_COUNTRIES.map((c) => `
+  #world-map #${c.id}, #world-map g#${c.id} path, #world-map path[id="_${c.id}"] {
+    fill: rgba(0, 82, 255, 0.15) !important;
+    stroke: rgba(0, 82, 255, 0.5) !important;
+    stroke-width: 1.2px !important;
+  }`).join("")}
+`;
+
 export function GlobalMap() {
   const [svgContent, setSvgContent] = useState<string>('');
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<ClientCountry | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Load SVG from the public folder
   useEffect(() => {
@@ -50,7 +73,7 @@ export function GlobalMap() {
         // Find the <svg element and add class/id attributes if missing
         setSvgContent(data);
       })
-      .catch((err) => console.error('Error loading world map:', err));
+      .catch(() => setSvgContent(''));
   }, []);
 
   // Handle country hover inside SVG
@@ -75,27 +98,6 @@ export function GlobalMap() {
   const handleMouseOut = () => {
     setHoveredCountry(null);
   };
-
-  // Convert SVG coordinates to relative container percentages
-  // viewBox: 30.767 241.591 784.077 458.627
-  const getCoordinates = (x: number, y: number) => {
-    const left = ((x - 30.767) / 784.077) * 100;
-    const top = ((y - 241.591) / 458.627) * 100;
-    return { left: `${left}%`, top: `${top}%` };
-  };
-
-  // Dynamic CSS injector to style the parsed SVG paths
-  const activeStyleRules = CLIENT_COUNTRIES.map(
-    (c) => `
-      #world-map #${c.id},
-      #world-map g#${c.id} path,
-      #world-map path[id="_${c.id}"] {
-        fill: rgba(0, 82, 255, 0.15) !important;
-        stroke: rgba(0, 82, 255, 0.5) !important;
-        stroke-width: 1.2px !important;
-      }
-    `
-  ).join('\n');
 
   const hoverStyleRule = hoveredCountry
     ? `
@@ -123,22 +125,9 @@ export function GlobalMap() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Styled SVG inject CSS */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        #world-map {
-          width: 100%;
-          height: 100%;
-        }
-        #world-map path {
-          fill: #cbd5e1;
-          stroke: #94a3b8;
-          stroke-width: 0.8px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        ${activeStyleRules}
-        ${hoverStyleRule}
-      `}} />
+      <style dangerouslySetInnerHTML={{ __html: BASE_MAP_CSS + hoverStyleRule }} />
 
-      <div className="relative z-10 container mx-auto px-4">
+      <div className="relative z-10">
         {/* Header */}
         <div className="max-w-3xl mb-16">
           <Reveal>
@@ -164,7 +153,6 @@ export function GlobalMap() {
           {/* Map display */}
           <div className="lg:col-span-8 bg-white border border-slate-200/80 rounded-3xl p-4 md:p-8 relative flex flex-col justify-center items-center shadow-lg shadow-slate-900/5">
             <div 
-              ref={containerRef}
               className="relative w-full aspect-[784/459] select-none"
               onMouseOver={handleMouseOver}
               onMouseOut={handleMouseOut}

@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRightIcon, MapPinIcon } from 'lucide-react';
@@ -14,6 +5,13 @@ import { PageHero } from '../../components/shared/PageHero';
 import { Section } from '../../components/shared/Section';
 import { Reveal } from '../../components/shared/Reveal';
 import { CTA } from '../../components/sections/CTA';
+import { pageMetadata } from '../../lib/seo';
+
+export const metadata = pageMetadata({
+  title: "Careers",
+  description: "Join Ahamic Solutions — a small team of senior designers and engineers who care about craft.",
+  path: "/careers"
+});
 
 const ROLES = [
 { title: 'Senior Product Designer', team: 'Design', location: 'Remote', type: 'Full-time' },

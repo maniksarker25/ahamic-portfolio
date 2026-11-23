@@ -31,11 +31,36 @@ This project was migrated from a Vite + React Router SPA to **Next.js 16** (App 
 ## Getting started
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Forms (contact, booking, newsletter)
+
+Submissions are emailed to the team by a server action (`app/actions/forms.ts`) using [Resend](https://resend.com).
+Copy `.env.example` to `.env.local` (and add the same variables on your hosting provider):
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `RESEND_API_KEY` | yes | API key from resend.com |
+| `CONTACT_TO_EMAIL` | no | Inbox that receives submissions (defaults to `SITE.email` in `constants/site.ts`) |
+| `CONTACT_FROM_EMAIL` | no | Sender on a domain verified in Resend, e.g. `Ahamic Website <hello@ahamicsolutions.com>` |
+
+Without `RESEND_API_KEY` the forms show visitors an error with the email address to write to, and the server logs that the message was not delivered — nothing is silently lost.
+
+## Editing content
+
+Most copy lives in `constants/site.ts` (services, projects, stats, FAQs, pricing, contact details). Images are registered with their dimensions in `constants/images.ts`. The hero mosaic's stat cards read from `STATS`, so they always match the Stats section.
+
+## Checks
+
+```bash
+npx tsc --noEmit   # types
+npm run lint       # ESLint (eslint.config.mjs)
+npm run build      # production build
+```
 
 ## Build
 

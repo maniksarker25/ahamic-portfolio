@@ -1,8 +1,3 @@
-
-
-
-
-
 import React from 'react';
 import { Section, SectionHeading } from '../shared/Section';
 import { Reveal } from '../shared/Reveal';
@@ -10,7 +5,7 @@ import { PROCESS } from '../../constants/site';
 
 export function Process() {
   return (
-    <Section>
+    <Section id="process" className="scroll-mt-24">
       <SectionHeading
         eyebrow="How we work"
         title="A process built for momentum"

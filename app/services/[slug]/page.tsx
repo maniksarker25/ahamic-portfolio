@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CheckIcon } from 'lucide-react';
 import { PageHero } from '../../../components/shared/PageHero';
@@ -9,6 +10,7 @@ import { FeaturedProjects } from '../../../components/sections/FeaturedProjects'
 import { FAQ } from '../../../components/sections/FAQ';
 import { CTA } from '../../../components/sections/CTA';
 import { SERVICES } from '../../../constants/site';
+import { pageMetadata } from '../../../lib/seo';
 
 const BENEFITS = [
 'A senior team accountable to your outcomes, not billable hours.',
@@ -26,6 +28,19 @@ const FEATURES = [
 
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
+}
+
+export const dynamicParams = false;
+
+export async function generateMetadata({ params }: {params: Promise<{slug: string;}>;}): Promise<Metadata> {
+  const { slug } = await params;
+  const service = SERVICES.find((s) => s.slug === slug);
+  if (!service) return {};
+  return pageMetadata({
+    title: `${service.title} Services`,
+    description: `${service.blurb} ${service.title} by Ahamic Solutions — a senior software team in Dhaka, Bangladesh, working with clients worldwide.`,
+    path: `/services/${service.slug}`
+  });
 }
 
 export default async function ServiceDetail({

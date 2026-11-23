@@ -1,53 +1,41 @@
-'use client';
-
-
-
-
-
-
-
-
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { MailIcon, PhoneIcon, MapPinIcon, ArrowUpRightIcon, Loader2Icon } from 'lucide-react';
+import React from 'react';
+import { MailIcon, PhoneIcon, MapPinIcon, Facebook, LinkedinIcon } from 'lucide-react';
 import { PageHero } from '../../components/shared/PageHero';
 import { Section } from '../../components/shared/Section';
 import { Reveal } from '../../components/shared/Reveal';
+import { ContactForm } from '../../components/forms/ContactForm';
 import { SITE } from '../../constants/site';
+import { pageMetadata } from '../../lib/seo';
 
-const budgets = ['< $25k', '$25k – $75k', '$75k – $150k', '$150k+'];
+export const metadata = pageMetadata({
+  title: 'Contact',
+  description: `Tell us about your project. ${SITE.name} replies within one business day with clear next steps.`,
+  path: '/contact'
+});
+
+const contactCards = [
+{ icon: MailIcon, label: 'Email', value: SITE.email, href: `mailto:${SITE.email}` },
+{ icon: PhoneIcon, label: 'Phone', value: SITE.phone, href: `tel:${SITE.phoneIntl}` },
+{ icon: MapPinIcon, label: 'Studio', value: SITE.address },
+{ icon: LinkedinIcon, label: 'LinkedIn', value: 'linkedin.com/company/ahamicsolutions', href: SITE.socials.find((s) => s.label === 'LinkedIn')?.href },
+{ icon: Facebook, label: 'Facebook', value: 'facebook.com/ahamicsolutions', href: SITE.socials.find((s) => s.label === 'Facebook')?.href }];
+
 
 export default function Contact() {
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
-
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    setTimeout(() => router.push('/thank-you'), 900);
-  }
-
-  const contactCards = [
-  { icon: MailIcon, label: 'Email', value: SITE.email, href: `mailto:${SITE.email}` },
-  { icon: PhoneIcon, label: 'Phone', value: SITE.phone, href: `tel:${SITE.phone}` },
-  { icon: MapPinIcon, label: 'Studio', value: SITE.address }];
-
-
   return (
     <>
       <PageHero
         crumbs={[{ label: 'Home', to: '/' }, { label: 'Contact' }]}
         eyebrow="Let's talk"
-        title={<>Tell us what you're<br />trying to build.</>}
+        title={<>Tell us what you’re<br />trying to build.</>}
         subtitle="Share a few details and we will get back within one business day with clear next steps." />
-      
 
       <Section className="pt-16">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <div className="space-y-4">
               {contactCards.map((c) => {
-                const Inner =
+                const inner =
                 <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-6 transition-colors hover:border-accent/50">
                     <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent-soft">
                       <c.icon className="h-5 w-5" />
@@ -59,10 +47,14 @@ export default function Contact() {
                   </div>;
 
                 return c.href ?
-                <a key={c.label} href={c.href} className="block">{Inner}</a> :
-
-                <div key={c.label}>{Inner}</div>;
-
+                <a
+                  key={c.label}
+                  href={c.href}
+                  className="block"
+                  {...c.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {}}>
+                    {inner}
+                  </a> :
+                <div key={c.label}>{inner}</div>;
               })}
             </div>
 
@@ -73,8 +65,8 @@ export default function Contact() {
                     <MapPinIcon className="h-6 w-6" />
                   </span>
                 </div>
-                <span className="absolute bottom-4 left-4 rounded-full border border-slate-200 bg-white/95 px-3 py-1 text-xs font-medium text-slate-900 backdrop-blur shadow-sm">
-                  Dhaka, Bangladesh · Remote worldwide
+                <span className="absolute bottom-4 left-4 rounded-full border border-slate-200 bg-white/95 px-3 py-1 text-xs font-medium text-slate-900 shadow-sm backdrop-blur">
+                  {SITE.address} · Remote worldwide
                 </span>
               </div>
             </div>
@@ -82,75 +74,11 @@ export default function Contact() {
 
           <div className="lg:col-span-7">
             <Reveal>
-              <form onSubmit={onSubmit} className="gradient-border rounded-3xl p-8">
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Field id="name" label="Full name" placeholder="Jane Cooper" required />
-                  <Field id="email" label="Work email" type="email" placeholder="jane@company.com" required />
-                  <Field id="company" label="Company" placeholder="Acme Inc." />
-                  <Field id="phone" label="Phone (optional)" placeholder="+1 555 000 0000" />
-                </div>
-
-                <fieldset className="mt-6">
-                  <legend className="mb-2 text-sm font-medium text-ink">Budget range</legend>
-                  <div className="flex flex-wrap gap-2">
-                    {budgets.map((b, i) =>
-                    <label key={b} className="cursor-pointer">
-                        <input type="radio" name="budget" defaultChecked={i === 1} className="peer sr-only" />
-                        <span className="inline-block rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted transition-colors peer-checked:border-accent peer-checked:bg-accent/15 peer-checked:text-ink">
-                          {b}
-                        </span>
-                      </label>
-                    )}
-                  </div>
-                </fieldset>
-
-                <div className="mt-6">
-                  <label htmlFor="message" className="mb-2 block text-sm font-medium text-ink">Project details</label>
-                  <textarea
-                    id="message"
-                    rows={5}
-                    required
-                    placeholder="Tell us about your goals, timeline, and where you need help…"
-                    className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-ink placeholder:text-muted focus:border-accent/60 focus:outline-none" />
-                  
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-medium text-bg transition-colors hover:bg-slate-800 disabled:opacity-60 sm:w-auto">
-                  
-                  {submitting ?
-                  <><Loader2Icon className="h-4 w-4 animate-spin" /> Sending…</> :
-
-                  <>Send message <ArrowUpRightIcon className="h-4 w-4" /></>
-                  }
-                </button>
-              </form>
+              <ContactForm />
             </Reveal>
           </div>
         </div>
       </Section>
     </>);
-
-}
-
-function Field({
-  id, label, type = 'text', placeholder, required
-}: {id: string;label: string;type?: string;placeholder?: string;required?: boolean;}) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-ink">
-        {label}{required && <span className="text-accent-soft"> *</span>}
-      </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-ink placeholder:text-muted focus:border-accent/60 focus:outline-none" />
-      
-    </div>);
 
 }

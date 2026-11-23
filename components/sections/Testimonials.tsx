@@ -1,8 +1,3 @@
-
-
-
-
-
 import React from 'react';
 import { QuoteIcon, StarIcon } from 'lucide-react';
 import { Section, SectionHeading } from '../shared/Section';
@@ -26,7 +21,7 @@ export function Testimonials() {
               <StarIcon key={s} className="h-4 w-4 fill-current" />
               )}
               </div>
-              <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-ink">"{t.quote}"</blockquote>
+              <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-ink">“{t.quote}”</blockquote>
               <figcaption className="mt-6 flex items-center gap-3">
                 <span className="grid h-11 w-11 place-items-center rounded-full bg-accent/15 font-display text-sm font-semibold text-accent-soft">
                   {t.name.split(' ').map((n) => n[0]).join('')}

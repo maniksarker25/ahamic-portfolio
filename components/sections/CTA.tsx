@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React from 'react';
 import { ArrowUpRightIcon } from 'lucide-react';
 import { Section } from '../shared/Section';
@@ -20,7 +14,7 @@ export function CTA() {
           <Aurora />
           <div className="relative z-10 mx-auto max-w-2xl">
             <h2 className="font-display text-4xl font-semibold leading-tight tracking-tight text-slate-900 md:text-6xl">
-              Let's build something<br /><span className="bg-gradient-to-r from-slate-900 via-accent to-blue-600 bg-clip-text text-transparent">worth trusting.</span>
+              Let’s build something<br /><span className="bg-gradient-to-r from-slate-900 via-accent to-blue-600 bg-clip-text text-transparent">worth trusting.</span>
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-base text-slate-600 md:text-lg">
               Tell us where you want to go. We will show you the fastest credible path to get there — with a plan you can act on immediately.

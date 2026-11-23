@@ -19,15 +19,23 @@ import {
   LightbulbIcon,
   type LucideIcon } from
 'lucide-react';
+import type { ImageKey } from './images';
 
 export const SITE = {
   name: 'Ahamic Solutions',
+  url: 'https://www.ahamicsolutions.com',
   tagline: 'Software Development & Digital Solutions Company',
   subline:
   'Ahamic Solutions is a software development company providing web development, mobile app development, SaaS, UI/UX design, and custom software solutions.',
   email: 'ahamicsolutions@gmail.com',
+  /** Shown to visitors */
   phone: '01575890667',
-  address: 'Dhaka, Bangladesh'
+  /** International format, used for tel: links and structured data */
+  phoneIntl: '+8801575890667',
+  address: 'Dhaka, Bangladesh',
+  socials: [
+    { label: 'Facebook', href: 'https://www.facebook.com/ahamicsolutions' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/ahamicsolutions' }]
 };
 
 export type Service = {
@@ -111,7 +119,7 @@ export type Project = {
   category: string;
   year: string;
   summary: string;
-  image: string;
+  image: ImageKey;
   metrics: {label: string;value: string;}[];
 };
 
@@ -123,7 +131,7 @@ export const PROJECTS: Project[] = [
   category: 'SaaS Development',
   year: '2025',
   summary: 'Designed and engineered a high-performance analytics dashboard, simplifying user workflows and data visualizations.',
-  image: 'PROJECT_VERTEX',
+  image: 'PROJECT_SAAS',
   metrics: [{ label: 'Workflow speed', value: '1.5x' }, { label: 'User adoption', value: '92%' }]
 },
 {
@@ -133,7 +141,7 @@ export const PROJECTS: Project[] = [
   category: 'Web Development',
   year: '2024',
   summary: 'Developed a robust, search-optimized e-commerce storefront with dynamic cart logic and secure payment integrations.',
-  image: 'PROJECT_CASCADE',
+  image: 'PROJECT_PAYMENTS',
   metrics: [{ label: 'Page load time', value: '-45%' }, { label: 'Conversion rate', value: '+12%' }]
 },
 {
@@ -143,7 +151,7 @@ export const PROJECTS: Project[] = [
   category: 'Software Development',
   year: '2025',
   summary: 'Built a secure, custom administration platform to manage scheduling, billing, and patient records securely.',
-  image: 'PROJECT_LUMEN',
+  image: 'PROJECT_HEALTHCARE',
   metrics: [{ label: 'Admin time saved', value: '30%' }, { label: 'Uptime', value: '99.9%' }]
 },
 {
@@ -153,21 +161,14 @@ export const PROJECTS: Project[] = [
   category: 'Mobile App Development',
   year: '2024',
   summary: 'Engineered a cross-platform mobile app for real-time tracking, offline sync, and delivery routing.',
-  image: 'PROJECT_NORTHWIND',
+  image: 'PROJECT_LOGISTICS',
   metrics: [{ label: 'On-time delivery', value: '+15%' }, { label: 'Manual work', value: '-50%' }]
 }];
 
 
 export const TESTIMONIALS = [
-{ quote: 'Ahamic Solutions operates like an extension of our own team. They designed and shipped our application on schedule and with high attention to detail.', name: 'Sarah Chen', role: 'CTO, Software Client', avatar: 'AVATAR_SARAH' },
-{ quote: 'The team design choices and execution were excellent. They delivered a highly responsive system that handles our workload effortlessly.', name: 'Marcus Reyes', role: 'VP Product, Retail Partner', avatar: 'AVATAR_MARCUS' }];
-
-
-export const AWARDS = [
-{ name: 'Awwwards', detail: 'Site of the Day × 4' },
-{ name: 'CSS Design Awards', detail: 'Best UI, 2025' },
-{ name: 'Clutch', detail: 'Top B2B Company' },
-{ name: 'Webby', detail: 'Honoree, Product Design' }];
+{ quote: 'Ahamic Solutions operates like an extension of our own team. They designed and shipped our application on schedule and with high attention to detail.', name: 'Sarah Chen', role: 'CTO, Software Client' },
+{ quote: 'The team design choices and execution were excellent. They delivered a highly responsive system that handles our workload effortlessly.', name: 'Marcus Reyes', role: 'VP Product, Retail Partner' }];
 
 
 export const FAQS = [
@@ -183,6 +184,29 @@ export const PRICING = [
 { name: 'Sprint', price: '$12k', period: '/ 2 weeks', desc: 'A focused burst to validate, design, or prototype a single big idea.', features: ['Discovery workshop', 'UX & UI design', 'Interactive prototype', 'Senior design lead', 'Async daily updates'], featured: false },
 { name: 'Build', price: '$45k', period: '/ month', desc: 'A dedicated senior pod designing and shipping your product end-to-end.', features: ['Design + engineering pod', 'Weekly production releases', 'Full design system', 'QA & testing', 'Dedicated product manager', 'Analytics & monitoring'], featured: true },
 { name: 'Partner', price: 'Custom', period: '', desc: 'A long-term partnership for enterprises scaling multiple products.', features: ['Multiple squads', 'Architecture & strategy', 'SLA & priority support', 'Security & compliance', 'Quarterly roadmapping', 'Executive reporting'], featured: false }];
+
+
+export type TeamMember = {
+  name: string;
+  role: string;
+  /** Path under /public. Square photos (e.g. 800×800 headshots) look best. */
+  photo: string;
+  /** Card background behind the photo. */
+  bg: string;
+};
+
+/**
+ * PLACEHOLDER TEAM — names are made up and the pictures are illustrated avatars
+ * (generated with DiceBear "Avataaars" by Pablo Stanley, free for commercial use).
+ * To use real people: put a square headshot in /public/team/ and change `photo` to its path.
+ */
+export const TEAM: TeamMember[] = [
+{ name: 'Amir Haque', role: 'Founder & Principal Engineer', photo: '/team/amir-haque.svg', bg: '#cfe9fb' },
+{ name: 'Nadia Rahman', role: 'Head of Design', photo: '/team/nadia-rahman.svg', bg: '#fdd8ef' },
+{ name: 'Lamia Chowdhury', role: 'Lead Frontend Engineer', photo: '/team/lamia-chowdhury.svg', bg: '#d7fbe8' },
+{ name: 'Tanvir Hossain', role: 'Senior Backend Engineer', photo: '/team/tanvir-hossain.svg', bg: '#dcd5fd' },
+{ name: 'Sadia Karim', role: 'QA & Test Engineer', photo: '/team/sadia-karim.svg', bg: '#ffe8cc' },
+{ name: 'Rafiq Ahmed', role: 'Project Manager', photo: '/team/rafiq-ahmed.svg', bg: '#d9f2f7' }];
 
 
 export const NAV_LINKS = [

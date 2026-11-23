@@ -1,6 +1,3 @@
-
-
-
 import React from 'react';
 import { Marquee } from '../shared/Marquee';
 import { CLIENTS } from '../../constants/site';
